@@ -24,14 +24,16 @@
 
 ### 快速开始
 
-> **重要：使用前请先关闭正在运行的 Claude Code 会话，设置修改后需要重启才能生效。**
+**第一步：确保 Claude Code 已经完全关闭**（退出终端中的 claude 会话，或直接关闭窗口）
+
+**第二步：运行命令**
 
 ```bash
 # 一行命令搞定（无需安装）
 npx github:lanceliu185/claude-perm on
-
-# 然后重新启动 Claude Code 就好了
 ```
+
+**第三步：重新打开 Claude Code**，权限已生效，不再弹确认框。
 
 ### 安装方式
 
@@ -172,14 +174,16 @@ Tired of Claude Code asking for permission every time it runs a command? `claude
 
 ### Quick Start
 
-> **Important: Close any running Claude Code session before using. Changes take effect after restarting.**
+**Step 1: Make sure Claude Code is fully closed** (exit the claude session in your terminal, or close the window)
+
+**Step 2: Run the command**
 
 ```bash
 # One-liner (no install)
 npx github:lanceliu185/claude-perm on
-
-# Restart Claude Code and enjoy.
 ```
+
+**Step 3: Reopen Claude Code** — permissions are now active, no more approval prompts.
 
 ### Installation
 
