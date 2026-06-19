@@ -22,7 +22,10 @@ const ALLOWED_TOOLS = [
 
 function readSettings() {
   try {
-    return JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf8"));
+    let raw = fs.readFileSync(SETTINGS_PATH, "utf8");
+    // Strip BOM if present (PowerShell tools may write it)
+    if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
+    return JSON.parse(raw);
   } catch {
     return {};
   }
