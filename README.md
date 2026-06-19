@@ -12,7 +12,7 @@ Tired of Claude Code asking for permission every time it runs a command? `claude
 
 ```bash
 # One-liner (no install)
-npx github:YOUR_USERNAME/claude-perm on
+npx github:lanceliu185/claude-perm on
 
 # That's it. Restart Claude Code and enjoy.
 ```
@@ -21,10 +21,10 @@ npx github:YOUR_USERNAME/claude-perm on
 
 ```bash
 # Option 1: npx (recommended — no install needed)
-npx github:YOUR_USERNAME/claude-perm on
+npx github:lanceliu185/claude-perm on
 
 # Option 2: Clone and link globally
-git clone https://github.com/YOUR_USERNAME/claude-perm.git
+git clone https://github.com/lanceliu185/claude-perm.git
 cd claude-perm
 npm link
 
