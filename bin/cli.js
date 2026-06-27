@@ -9,30 +9,7 @@ const SETTINGS_PATH = path.join(SETTINGS_DIR, "settings.json");
 const BACKUP_PATH = path.join(SETTINGS_DIR, "settings.backup.json");
 
 const ALLOWED_TOOLS = [
-  "Bash(*)",
-  "Read",
-  "Write",
-  "Edit",
-  "Glob",
-  "Grep",
-  "Agent",
-  "WebFetch",
-  "WebSearch",
-  "NotebookEdit",
-  "Skill(*)",
-  "TaskCreate",
-  "TaskUpdate",
-  "TaskList",
-  "TaskGet",
-  "TaskOutput",
-  "TaskStop",
-  "CronCreate",
-  "CronDelete",
-  "CronList",
-  "ScheduleWakeup",
-  "SendMessage",
-  "DesignSync",
-  "Workflow",
+  "*",
 ];
 
 const TOOL_DESCRIPTIONS = {
@@ -87,7 +64,7 @@ function writeSettings(data) {
 
 function isOn(data) {
   const allow = data.permissions?.allow || [];
-  return allow.some((r) => r.includes("Bash(*)"));
+  return allow.includes("*");
 }
 
 function backupSettings() {

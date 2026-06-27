@@ -6,13 +6,7 @@ $SETTINGS_DIR = Join-Path $env:USERPROFILE ".claude"
 $SETTINGS_PATH = Join-Path $SETTINGS_DIR "settings.json"
 $BACKUP_PATH = Join-Path $SETTINGS_DIR "settings.backup.json"
 
-$ALLOWED_TOOLS = @(
-    "Bash(*)", "Read", "Write", "Edit", "Glob", "Grep",
-    "Agent", "WebFetch", "WebSearch", "NotebookEdit", "Skill(*)",
-    "TaskCreate", "TaskUpdate", "TaskList", "TaskGet", "TaskOutput", "TaskStop",
-    "CronCreate", "CronDelete", "CronList", "ScheduleWakeup",
-    "SendMessage", "DesignSync", "Workflow"
-)
+$ALLOWED_TOOLS = @("*")
 
 function Read-Settings {
     if (Test-Path $SETTINGS_PATH) {
@@ -31,7 +25,7 @@ function Write-Settings($data) {
 function Get-Status {
     $data = Read-Settings
     if ($data.permissions -and $data.permissions.allow) {
-        return ($data.permissions.allow | Where-Object { $_ -like "*Bash(*)*" }).Count -gt 0
+        return ($data.permissions.allow | Where-Object { $_ -eq "*" }).Count -gt 0
     }
     return $false
 }
@@ -180,7 +174,7 @@ function Clean-ProjectSettings {
                        FontSize="32" FontWeight="Bold"
                        Foreground="#CDD6F4"
                        HorizontalAlignment="Center"/>
-            <TextBlock Text="v1.4.0"
+            <TextBlock Text="v1.5.0"
                        FontSize="12" Foreground="#585B70"
                        HorizontalAlignment="Center"
                        Margin="0,5,0,0"/>
@@ -305,8 +299,8 @@ $BtnRestore = $window.FindName("BtnRestore")
 $BtnClean   = $window.FindName("BtnClean")
 
 $PathText.Text = $SETTINGS_PATH
-$ToolList.ItemsSource = $ALLOWED_TOOLS
-$ToolCount.Text = "($($ALLOWED_TOOLS.Count) tools)"
+$ToolList.ItemsSource = @("All tools (*)")
+$ToolCount.Text = "(1 wildcard rule)"
 
 $script:IsOn = $false
 
