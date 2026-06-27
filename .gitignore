@@ -1,6 +1,4 @@
 node_modules/
-dist/
-*.exe
 *.tgz
 .DS_Store
 RELEASE_NOTES.md
