@@ -71,6 +71,16 @@ function Restore-Settings {
     }
 }
 
+function Clean-ProjectSettings {
+    $localSettingsPath = Join-Path (Get-Location) ".claude\settings.local.json"
+    if (Test-Path $localSettingsPath) {
+        Remove-Item -Path $localSettingsPath -Force
+        [System.Windows.MessageBox]::Show("Project settings cleaned!", "Clean", "OK", "Information")
+    } else {
+        [System.Windows.MessageBox]::Show("No project settings found.", "Clean", "OK", "Warning")
+    }
+}
+
 # ── XAML ─────────────────────────────────────────────────────────────────────
 
 [xml]$xaml = @"
@@ -170,7 +180,7 @@ function Restore-Settings {
                        FontSize="32" FontWeight="Bold"
                        Foreground="#CDD6F4"
                        HorizontalAlignment="Center"/>
-            <TextBlock Text="v1.3.0"
+            <TextBlock Text="v1.4.0"
                        FontSize="12" Foreground="#585B70"
                        HorizontalAlignment="Center"
                        Margin="0,5,0,0"/>
@@ -214,16 +224,17 @@ function Restore-Settings {
                     Width="100" Margin="10,0,0,0"/>
         </StackPanel>
 
-        <!-- Backup/Restore Buttons -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal"
-                    HorizontalAlignment="Center" Margin="0,0,0,20">
+        <!-- Backup/Restore/Clean Buttons -->
+        <WrapPanel Grid.Row="3" HorizontalAlignment="Center" Margin="0,0,0,20">
             <Button x:Name="BtnBackup" Content="Backup"
                     Style="{StaticResource SecondaryButton}"
                     Margin="0,0,10,0"/>
             <Button x:Name="BtnRestore" Content="Restore"
                     Style="{StaticResource SecondaryButton}"
-                    Margin="10,0,0,0"/>
-        </StackPanel>
+                    Margin="0,0,10,0"/>
+            <Button x:Name="BtnClean" Content="Clean"
+                    Style="{StaticResource SecondaryButton}"/>
+        </WrapPanel>
 
         <!-- Tools Section -->
         <Border Grid.Row="4" Style="{StaticResource Card}" Margin="0,0,0,15">
@@ -291,6 +302,7 @@ $BtnOn      = $window.FindName("BtnOn")
 $BtnOff     = $window.FindName("BtnOff")
 $BtnBackup  = $window.FindName("BtnBackup")
 $BtnRestore = $window.FindName("BtnRestore")
+$BtnClean   = $window.FindName("BtnClean")
 
 $PathText.Text = $SETTINGS_PATH
 $ToolList.ItemsSource = $ALLOWED_TOOLS
@@ -347,6 +359,7 @@ $BtnOn.Add_Click({ Do-On })
 $BtnOff.Add_Click({ Do-Off })
 $BtnBackup.Add_Click({ Backup-Settings })
 $BtnRestore.Add_Click({ Restore-Settings })
+$BtnClean.Add_Click({ Clean-ProjectSettings })
 $window.Add_Loaded({ Update-UI })
 
 # ── Run ──────────────────────────────────────────────────────────────────────

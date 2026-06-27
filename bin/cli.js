@@ -120,6 +120,66 @@ function restoreSettings() {
   }
 }
 
+function cleanProjectSettings(dir = process.cwd()) {
+  const localSettingsPath = path.join(dir, ".claude", "settings.local.json");
+  try {
+    if (fs.existsSync(localSettingsPath)) {
+      fs.unlinkSync(localSettingsPath);
+      console.log(`✓ Removed project settings: ${localSettingsPath}`);
+      return true;
+    }
+    console.log("No project settings found");
+    return false;
+  } catch (e) {
+    console.error(`Clean failed: ${e.message}`);
+    return false;
+  }
+}
+
+function cleanAllProjectSettings() {
+  const homeDir = os.homedir();
+  const commonDirs = [
+    path.join(homeDir, "Desktop"),
+    path.join(homeDir, "Documents"),
+    path.join(homeDir, "Projects"),
+    path.join(homeDir, "Code"),
+  ];
+
+  let cleaned = 0;
+
+  function scanDir(dir) {
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory() && !entry.name.startsWith(".")) {
+          const projectDir = path.join(dir, entry.name);
+          const localSettingsPath = path.join(projectDir, ".claude", "settings.local.json");
+          if (fs.existsSync(localSettingsPath)) {
+            fs.unlinkSync(localSettingsPath);
+            console.log(`✓ Removed: ${localSettingsPath}`);
+            cleaned++;
+          }
+        }
+      }
+    } catch (e) {
+      // Skip directories we can't read
+    }
+  }
+
+  for (const dir of commonDirs) {
+    if (fs.existsSync(dir)) {
+      scanDir(dir);
+    }
+  }
+
+  if (cleaned === 0) {
+    console.log("No project settings found to clean");
+  } else {
+    console.log(`\n✓ Cleaned ${cleaned} project settings files`);
+  }
+  return cleaned;
+}
+
 function showStatus() {
   const data = readSettings();
   const enabled = isOn(data);
@@ -162,6 +222,8 @@ switch (cmd) {
     data.permissions.allow = ALLOWED_TOOLS;
     writeSettings(data);
     console.log("\n✓ Permissions ON — all tool calls auto-approved");
+    console.log("  Cleaning project-level settings...");
+    cleanProjectSettings();
     console.log("  Restart Claude Code session to take effect.\n");
     break;
   }
@@ -193,16 +255,28 @@ switch (cmd) {
     break;
   }
 
+  case "clean": {
+    cleanProjectSettings();
+    break;
+  }
+
+  case "clean-all": {
+    cleanAllProjectSettings();
+    break;
+  }
+
   case "more": {
     showStatus();
     console.log("  Commands:");
     console.log(`  ${"─".repeat(50)}`);
-    console.log("    claude-perm on       Allow all tool calls");
-    console.log("    claude-perm off      Restore permission prompts");
-    console.log("    claude-perm status   Show current state");
-    console.log("    claude-perm backup   Backup current settings");
-    console.log("    claude-perm restore  Restore from backup");
-    console.log("    claude-perm more     Show this help");
+    console.log("    claude-perm on        Allow all tool calls");
+    console.log("    claude-perm off       Restore permission prompts");
+    console.log("    claude-perm status    Show current state");
+    console.log("    claude-perm backup    Backup current settings");
+    console.log("    claude-perm restore   Restore from backup");
+    console.log("    claude-perm clean     Remove project settings");
+    console.log("    claude-perm clean-all Remove all project settings");
+    console.log("    claude-perm more      Show this help");
     console.log();
     break;
   }
@@ -216,21 +290,23 @@ switch (cmd) {
   One-click toggle for Claude Code permissions
 
   Usage:
-    claude-perm on       Allow all tool calls without prompts
-    claude-perm off      Restore permission prompts
-    claude-perm status   Show current state
-    claude-perm backup   Backup current settings
-    claude-perm restore  Restore settings from backup
-    claude-perm more     Show detailed info
+    claude-perm on        Allow all tool calls without prompts
+    claude-perm off       Restore permission prompts
+    claude-perm status    Show current state
+    claude-perm backup    Backup current settings
+    claude-perm restore   Restore settings from backup
+    claude-perm clean     Remove project-level settings
+    claude-perm clean-all Remove all project settings
+    claude-perm more      Show detailed info
 
   Settings: ~/.claude/settings.json
   Backup:   ~/.claude/settings.backup.json
 
   Examples:
-    claude-perm on       # Enable permissions
-    claude-perm off      # Disable permissions
-    claude-perm backup   # Backup before changes
-    claude-perm status   # Check current state
+    claude-perm on        # Enable permissions
+    claude-perm off       # Disable permissions
+    claude-perm clean-all # Clean all project settings
+    claude-perm status    # Check current state
 `);
   }
 }
