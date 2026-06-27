@@ -5,6 +5,7 @@ Add-Type -AssemblyName WindowsBase
 $SETTINGS_DIR = Join-Path $env:USERPROFILE ".claude"
 $SETTINGS_PATH = Join-Path $SETTINGS_DIR "settings.json"
 $BACKUP_PATH = Join-Path $SETTINGS_DIR "settings.backup.json"
+$GUARD_PID_PATH = Join-Path $SETTINGS_DIR "guard.pid"
 
 $ALLOWED_TOOLS = @("*")
 
@@ -72,6 +73,58 @@ function Clean-ProjectSettings {
         [System.Windows.MessageBox]::Show("Project settings cleaned!", "Clean", "OK", "Information")
     } else {
         [System.Windows.MessageBox]::Show("No project settings found.", "Clean", "OK", "Warning")
+    }
+}
+
+function Get-GuardStatus {
+    if (Test-Path $GUARD_PID_PATH) {
+        $pid = Get-Content $GUARD_PID_PATH -Raw
+        try {
+            $process = Get-Process -Id ([int]$pid) -ErrorAction Stop
+            return $true
+        } catch {
+            Remove-Item -Path $GUARD_PID_PATH -Force -ErrorAction SilentlyContinue
+            return $false
+        }
+    }
+    return $false
+}
+
+function Start-Guard {
+    if (Get-GuardStatus) {
+        [System.Windows.MessageBox]::Show("Guard is already running!", "Guard", "OK", "Information")
+        return
+    }
+
+    # Start guard process in background
+    $guardScript = Join-Path $PSScriptRoot "..\bin\cli.js"
+    $process = Start-Process -FilePath "node" -ArgumentList "`"$guardScript`" guard 30" -WindowStyle Hidden -PassThru
+
+    Start-Sleep -Seconds 1
+
+    if (Get-GuardStatus) {
+        Update-GuardUI
+        [System.Windows.MessageBox]::Show("Guard started!`nAuto-cleaning project settings every 30 seconds.", "Guard", "OK", "Information")
+    } else {
+        [System.Windows.MessageBox]::Show("Failed to start guard.", "Guard", "OK", "Error")
+    }
+}
+
+function Stop-Guard {
+    if (-not (Get-GuardStatus)) {
+        [System.Windows.MessageBox]::Show("Guard is not running.", "Guard", "OK", "Warning")
+        return
+    }
+
+    try {
+        $pid = [int](Get-Content $GUARD_PID_PATH -Raw)
+        Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $GUARD_PID_PATH -Force -ErrorAction SilentlyContinue
+        Update-GuardUI
+        [System.Windows.MessageBox]::Show("Guard stopped.", "Guard", "OK", "Information")
+    } catch {
+        Remove-Item -Path $GUARD_PID_PATH -Force -ErrorAction SilentlyContinue
+        Update-GuardUI
     }
 }
 
@@ -174,7 +227,7 @@ function Clean-ProjectSettings {
                        FontSize="32" FontWeight="Bold"
                        Foreground="#CDD6F4"
                        HorizontalAlignment="Center"/>
-            <TextBlock Text="v1.5.0"
+            <TextBlock Text="v1.6.0"
                        FontSize="12" Foreground="#585B70"
                        HorizontalAlignment="Center"
                        Margin="0,5,0,0"/>
@@ -218,7 +271,7 @@ function Clean-ProjectSettings {
                     Width="100" Margin="10,0,0,0"/>
         </StackPanel>
 
-        <!-- Backup/Restore/Clean Buttons -->
+        <!-- Backup/Restore/Clean/Guard Buttons -->
         <WrapPanel Grid.Row="3" HorizontalAlignment="Center" Margin="0,0,0,20">
             <Button x:Name="BtnBackup" Content="Backup"
                     Style="{StaticResource SecondaryButton}"
@@ -227,6 +280,9 @@ function Clean-ProjectSettings {
                     Style="{StaticResource SecondaryButton}"
                     Margin="0,0,10,0"/>
             <Button x:Name="BtnClean" Content="Clean"
+                    Style="{StaticResource SecondaryButton}"
+                    Margin="0,0,10,0"/>
+            <Button x:Name="BtnGuard" Content="Guard"
                     Style="{StaticResource SecondaryButton}"/>
         </WrapPanel>
 
@@ -262,10 +318,14 @@ function Clean-ProjectSettings {
         <!-- Info Section -->
         <Border Grid.Row="5" Style="{StaticResource Card}" Margin="0,0,0,15">
             <StackPanel>
-                <TextBlock Text="Configuration"
-                           FontSize="13" FontWeight="SemiBold"
-                           Foreground="#CDD6F4"
-                           Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Configuration"
+                               FontSize="13" FontWeight="SemiBold"
+                               Foreground="#CDD6F4"/>
+                    <TextBlock x:Name="GuardStatusText"
+                               FontSize="11" Foreground="#585B70"
+                               Margin="10,2,0,0"/>
+                </StackPanel>
                 <TextBlock x:Name="PathText" FontSize="11" Foreground="#585B70"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -297,6 +357,8 @@ $BtnOff     = $window.FindName("BtnOff")
 $BtnBackup  = $window.FindName("BtnBackup")
 $BtnRestore = $window.FindName("BtnRestore")
 $BtnClean   = $window.FindName("BtnClean")
+$BtnGuard   = $window.FindName("BtnGuard")
+$GuardStatusText = $window.FindName("GuardStatusText")
 
 $PathText.Text = $SETTINGS_PATH
 $ToolList.ItemsSource = @("All tools (*)")
@@ -327,6 +389,19 @@ function Update-UI {
         $StatusText.Foreground = $RedBrush
         $HintText.Text = "Restart Claude Code to apply changes"
     }
+    Update-GuardUI
+}
+
+function Update-GuardUI {
+    if (Get-GuardStatus) {
+        $GuardStatusText.Text = "Guard: Running"
+        $GuardStatusText.Foreground = $GreenBrush
+        $BtnGuard.Content = "Stop Guard"
+    } else {
+        $GuardStatusText.Text = "Guard: Stopped"
+        $GuardStatusText.Foreground = $RedBrush
+        $BtnGuard.Content = "Start Guard"
+    }
 }
 
 function Do-Toggle {
@@ -345,6 +420,14 @@ function Do-Off {
     Update-UI
 }
 
+function Do-Guard {
+    if (Get-GuardStatus) {
+        Stop-Guard
+    } else {
+        Start-Guard
+    }
+}
+
 # ── Events ───────────────────────────────────────────────────────────────────
 
 $Track.Add_MouseLeftButtonDown({ Do-Toggle })
@@ -354,6 +437,7 @@ $BtnOff.Add_Click({ Do-Off })
 $BtnBackup.Add_Click({ Backup-Settings })
 $BtnRestore.Add_Click({ Restore-Settings })
 $BtnClean.Add_Click({ Clean-ProjectSettings })
+$BtnGuard.Add_Click({ Do-Guard })
 $window.Add_Loaded({ Update-UI })
 
 # ── Run ──────────────────────────────────────────────────────────────────────

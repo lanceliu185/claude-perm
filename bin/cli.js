@@ -7,6 +7,8 @@ const os = require("os");
 const SETTINGS_DIR = path.join(os.homedir(), ".claude");
 const SETTINGS_PATH = path.join(SETTINGS_DIR, "settings.json");
 const BACKUP_PATH = path.join(SETTINGS_DIR, "settings.backup.json");
+const GUARD_PID_PATH = path.join(SETTINGS_DIR, "guard.pid");
+const GUARD_LOG_PATH = path.join(SETTINGS_DIR, "guard.log");
 
 const ALLOWED_TOOLS = [
   "*",
@@ -157,6 +159,126 @@ function cleanAllProjectSettings() {
   return cleaned;
 }
 
+function isGuardRunning() {
+  try {
+    if (fs.existsSync(GUARD_PID_PATH)) {
+      const pid = parseInt(fs.readFileSync(GUARD_PID_PATH, "utf8").trim());
+      // Check if process is running
+      try {
+        process.kill(pid, 0);
+        return true;
+      } catch {
+        // Process not running, clean up pid file
+        fs.unlinkSync(GUARD_PID_PATH);
+        return false;
+      }
+    }
+  } catch {}
+  return false;
+}
+
+function startGuard(intervalSeconds = 30) {
+  if (isGuardRunning()) {
+    console.log("Guard is already running");
+    return;
+  }
+
+  const pid = process.pid;
+  fs.writeFileSync(GUARD_PID_PATH, pid.toString());
+
+  console.log(`\n✓ Guard started (PID: ${pid})`);
+  console.log(`  Cleaning project settings every ${intervalSeconds} seconds`);
+  console.log(`  Log: ${GUARD_LOG_PATH}`);
+  console.log(`  Stop: claude-perm stop-guard\n`);
+
+  // Log function
+  function log(msg) {
+    const timestamp = new Date().toISOString();
+    const line = `[${timestamp}] ${msg}\n`;
+    fs.appendFileSync(GUARD_LOG_PATH, line);
+  }
+
+  log("Guard started");
+
+  // Run clean immediately
+  const homeDir = os.homedir();
+  const commonDirs = [
+    path.join(homeDir, "Desktop"),
+    path.join(homeDir, "Documents"),
+    path.join(homeDir, "Projects"),
+    path.join(homeDir, "Code"),
+  ];
+
+  function cleanAll() {
+    let cleaned = 0;
+    for (const dir of commonDirs) {
+      if (fs.existsSync(dir)) {
+        try {
+          const entries = fs.readdirSync(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            if (entry.isDirectory() && !entry.name.startsWith(".")) {
+              const projectDir = path.join(dir, entry.name);
+              const localSettingsPath = path.join(projectDir, ".claude", "settings.local.json");
+              if (fs.existsSync(localSettingsPath)) {
+                fs.unlinkSync(localSettingsPath);
+                log(`Removed: ${localSettingsPath}`);
+                cleaned++;
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+    if (cleaned > 0) {
+      log(`Cleaned ${cleaned} project settings files`);
+    }
+  }
+
+  // Clean immediately
+  cleanAll();
+
+  // Set up interval
+  setInterval(() => {
+    cleanAll();
+  }, intervalSeconds * 1000);
+
+  // Keep process running
+  process.on("SIGINT", () => {
+    log("Guard stopped");
+    if (fs.existsSync(GUARD_PID_PATH)) {
+      fs.unlinkSync(GUARD_PID_PATH);
+    }
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", () => {
+    log("Guard stopped");
+    if (fs.existsSync(GUARD_PID_PATH)) {
+      fs.unlinkSync(GUARD_PID_PATH);
+    }
+    process.exit(0);
+  });
+}
+
+function stopGuard() {
+  if (!isGuardRunning()) {
+    console.log("Guard is not running");
+    return;
+  }
+
+  try {
+    const pid = parseInt(fs.readFileSync(GUARD_PID_PATH, "utf8").trim());
+    process.kill(pid, "SIGTERM");
+    fs.unlinkSync(GUARD_PID_PATH);
+    console.log(`✓ Guard stopped (PID: ${pid})`);
+  } catch (e) {
+    console.log(`Guard stopped`);
+    if (fs.existsSync(GUARD_PID_PATH)) {
+      fs.unlinkSync(GUARD_PID_PATH);
+    }
+  }
+}
+
 function showStatus() {
   const data = readSettings();
   const enabled = isOn(data);
@@ -242,18 +364,42 @@ switch (cmd) {
     break;
   }
 
+  case "guard": {
+    const interval = parseInt(process.argv[3]) || 30;
+    startGuard(interval);
+    break;
+  }
+
+  case "stop-guard": {
+    stopGuard();
+    break;
+  }
+
+  case "guard-status": {
+    if (isGuardRunning()) {
+      const pid = fs.readFileSync(GUARD_PID_PATH, "utf8").trim();
+      console.log(`Guard is running (PID: ${pid})`);
+    } else {
+      console.log("Guard is not running");
+    }
+    break;
+  }
+
   case "more": {
     showStatus();
     console.log("  Commands:");
     console.log(`  ${"─".repeat(50)}`);
-    console.log("    claude-perm on        Allow all tool calls");
-    console.log("    claude-perm off       Restore permission prompts");
-    console.log("    claude-perm status    Show current state");
-    console.log("    claude-perm backup    Backup current settings");
-    console.log("    claude-perm restore   Restore from backup");
-    console.log("    claude-perm clean     Remove project settings");
-    console.log("    claude-perm clean-all Remove all project settings");
-    console.log("    claude-perm more      Show this help");
+    console.log("    claude-perm on          Allow all tool calls");
+    console.log("    claude-perm off         Restore permission prompts");
+    console.log("    claude-perm status      Show current state");
+    console.log("    claude-perm backup      Backup current settings");
+    console.log("    claude-perm restore     Restore from backup");
+    console.log("    claude-perm clean       Remove project settings");
+    console.log("    claude-perm clean-all   Remove all project settings");
+    console.log("    claude-perm guard       Start guard (auto-clean)");
+    console.log("    claude-perm stop-guard  Stop guard");
+    console.log("    claude-perm guard-status Check guard status");
+    console.log("    claude-perm more        Show this help");
     console.log();
     break;
   }
@@ -267,23 +413,26 @@ switch (cmd) {
   One-click toggle for Claude Code permissions
 
   Usage:
-    claude-perm on        Allow all tool calls without prompts
-    claude-perm off       Restore permission prompts
-    claude-perm status    Show current state
-    claude-perm backup    Backup current settings
-    claude-perm restore   Restore settings from backup
-    claude-perm clean     Remove project-level settings
-    claude-perm clean-all Remove all project settings
-    claude-perm more      Show detailed info
+    claude-perm on          Allow all tool calls without prompts
+    claude-perm off         Restore permission prompts
+    claude-perm status      Show current state
+    claude-perm backup      Backup current settings
+    claude-perm restore     Restore settings from backup
+    claude-perm clean       Remove project-level settings
+    claude-perm clean-all   Remove all project settings
+    claude-perm guard       Start guard (auto-clean every 30s)
+    claude-perm stop-guard  Stop guard
+    claude-perm guard-status Check guard status
+    claude-perm more        Show detailed info
 
   Settings: ~/.claude/settings.json
   Backup:   ~/.claude/settings.backup.json
 
   Examples:
-    claude-perm on        # Enable permissions
-    claude-perm off       # Disable permissions
-    claude-perm clean-all # Clean all project settings
-    claude-perm status    # Check current state
+    claude-perm on          # Enable permissions
+    claude-perm guard       # Start auto-clean guard
+    claude-perm clean-all   # Clean all project settings
+    claude-perm status      # Check current state
 `);
   }
 }

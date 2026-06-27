@@ -1,6 +1,6 @@
 {
   "name": "claude-perm",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "One-click permission toggle for Claude Code — suppress all tool approval prompts with backup support",
   "main": "bin/cli.js",
   "bin": {
@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node bin/cli.js",
     "status": "node bin/cli.js status",
-    "build:exe": "powershell -Command \"Import-Module ps2exe; Invoke-PS2EXE -InputFile src/claude-perm.ps1 -OutputFile dist/claude-perm.exe -noConsole -title 'Claude Code Permission Toggle' -version '1.5.0.0' -supportOS -IconFile icon.ico\"",
+    "build:exe": "powershell -Command \"Import-Module ps2exe; Invoke-PS2EXE -InputFile src/claude-perm.ps1 -OutputFile dist/claude-perm.exe -noConsole -title 'Claude Code Permission Toggle' -version '1.6.0.0' -supportOS -IconFile icon.ico\"",
     "test": "node bin/cli.js status"
   },
   "keywords": [
