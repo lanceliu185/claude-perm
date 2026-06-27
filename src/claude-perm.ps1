@@ -8,7 +8,10 @@ $BACKUP_PATH = Join-Path $SETTINGS_DIR "settings.backup.json"
 
 $ALLOWED_TOOLS = @(
     "Bash(*)", "Read", "Write", "Edit", "Glob", "Grep",
-    "Agent", "WebFetch", "WebSearch", "NotebookEdit", "Skill(*)"
+    "Agent", "WebFetch", "WebSearch", "NotebookEdit", "Skill(*)",
+    "TaskCreate", "TaskUpdate", "TaskList", "TaskGet", "TaskOutput", "TaskStop",
+    "CronCreate", "CronDelete", "CronList", "ScheduleWakeup",
+    "SendMessage", "DesignSync", "Workflow"
 )
 
 function Read-Settings {

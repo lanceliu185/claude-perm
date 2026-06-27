@@ -97,7 +97,20 @@ npm run build:exe
       "WebFetch",
       "WebSearch",
       "NotebookEdit",
-      "Skill(*)"
+      "Skill(*)",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskList",
+      "TaskGet",
+      "TaskOutput",
+      "TaskStop",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "ScheduleWakeup",
+      "SendMessage",
+      "DesignSync",
+      "Workflow"
     ]
   }
 }
@@ -120,6 +133,19 @@ npm run build:exe
 | `WebSearch` | 网页搜索 |
 | `NotebookEdit` | Jupyter 笔记本 |
 | `Skill(*)` | 所有 Skills |
+| `TaskCreate` | 创建任务列表 |
+| `TaskUpdate` | 更新任务状态 |
+| `TaskList` | 列出所有任务 |
+| `TaskGet` | 获取任务详情 |
+| `TaskOutput` | 获取任务输出 |
+| `TaskStop` | 停止运行中的任务 |
+| `CronCreate` | 创建定时任务 |
+| `CronDelete` | 删除定时任务 |
+| `CronList` | 列出定时任务 |
+| `ScheduleWakeup` | 定时唤醒 |
+| `SendMessage` | 向代理发送消息 |
+| `DesignSync` | 同步设计系统 |
+| `Workflow` | 执行工作流 |
 
 ### 项目结构
 
@@ -240,7 +266,10 @@ Modifies `~/.claude/settings.json` to add allow rules:
   "permissions": {
     "allow": [
       "Bash(*)", "Read", "Write", "Edit", "Glob", "Grep",
-      "Agent", "WebFetch", "WebSearch", "NotebookEdit", "Skill(*)"
+      "Agent", "WebFetch", "WebSearch", "NotebookEdit", "Skill(*)",
+      "TaskCreate", "TaskUpdate", "TaskList", "TaskGet", "TaskOutput", "TaskStop",
+      "CronCreate", "CronDelete", "CronList", "ScheduleWakeup",
+      "SendMessage", "DesignSync", "Workflow"
     ]
   }
 }
@@ -261,6 +290,19 @@ Modifies `~/.claude/settings.json` to add allow rules:
 | `WebSearch` | Web search |
 | `NotebookEdit` | Jupyter notebooks |
 | `Skill(*)` | All skills |
+| `TaskCreate` | Create task lists |
+| `TaskUpdate` | Update task status |
+| `TaskList` | List all tasks |
+| `TaskGet` | Get task details |
+| `TaskOutput` | Get task output |
+| `TaskStop` | Stop running tasks |
+| `CronCreate` | Create scheduled tasks |
+| `CronDelete` | Delete scheduled tasks |
+| `CronList` | List scheduled tasks |
+| `ScheduleWakeup` | Schedule wakeups |
+| `SendMessage` | Send messages to agents |
+| `DesignSync` | Sync design systems |
+| `Workflow` | Execute workflows |
 
 ### FAQ
 

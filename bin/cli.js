@@ -20,6 +20,19 @@ const ALLOWED_TOOLS = [
   "WebSearch",
   "NotebookEdit",
   "Skill(*)",
+  "TaskCreate",
+  "TaskUpdate",
+  "TaskList",
+  "TaskGet",
+  "TaskOutput",
+  "TaskStop",
+  "CronCreate",
+  "CronDelete",
+  "CronList",
+  "ScheduleWakeup",
+  "SendMessage",
+  "DesignSync",
+  "Workflow",
 ];
 
 const TOOL_DESCRIPTIONS = {
@@ -34,6 +47,19 @@ const TOOL_DESCRIPTIONS = {
   WebSearch: "Search the web",
   NotebookEdit: "Edit Jupyter notebooks",
   "Skill(*)": "Execute all skills",
+  TaskCreate: "Create task lists",
+  TaskUpdate: "Update task status",
+  TaskList: "List all tasks",
+  TaskGet: "Get task details",
+  TaskOutput: "Get task output",
+  TaskStop: "Stop running tasks",
+  CronCreate: "Create scheduled tasks",
+  CronDelete: "Delete scheduled tasks",
+  CronList: "List scheduled tasks",
+  ScheduleWakeup: "Schedule wakeups",
+  SendMessage: "Send messages to agents",
+  DesignSync: "Sync design systems",
+  Workflow: "Execute workflows",
 };
 
 function readSettings() {
