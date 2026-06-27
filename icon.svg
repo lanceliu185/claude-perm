@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4A574;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C4956A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="128" cy="128" r="120" fill="#1E1E2E"/>
+
+  <!-- Claude face (cat-like) -->
+  <ellipse cx="128" cy="135" rx="65" ry="70" fill="url(#grad1)"/>
+
+  <!-- Left ear -->
+  <polygon points="75,80 55,30 100,70" fill="url(#grad1)"/>
+  <polygon points="80,78 65,40 95,72" fill="#E8D5C4"/>
+
+  <!-- Right ear -->
+  <polygon points="181,80 201,30 156,70" fill="url(#grad1)"/>
+  <polygon points="176,78 191,40 161,72" fill="#E8D5C4"/>
+
+  <!-- Eyes -->
+  <ellipse cx="105" cy="120" rx="12" ry="14" fill="#1E1E2E"/>
+  <ellipse cx="151" cy="120" rx="12" ry="14" fill="#1E1E2E"/>
+
+  <!-- Eye shine -->
+  <circle cx="109" cy="116" r="4" fill="white" opacity="0.8"/>
+  <circle cx="155" cy="116" r="4" fill="white" opacity="0.8"/>
+
+  <!-- Nose -->
+  <ellipse cx="128" cy="142" rx="6" ry="4" fill="#E8D5C4"/>
+
+  <!-- Mouth -->
+  <path d="M 118 152 Q 128 160 138 152" stroke="#1E1E2E" stroke-width="2" fill="none"/>
+
+  <!-- Whiskers -->
+  <line x1="85" y1="138" x2="55" y2="132" stroke="#E8D5C4" stroke-width="1.5"/>
+  <line x1="85" y1="145" x2="52" y2="148" stroke="#E8D5C4" stroke-width="1.5"/>
+  <line x1="171" y1="138" x2="201" y2="132" stroke="#E8D5C4" stroke-width="1.5"/>
+  <line x1="171" y1="145" x2="204" y2="148" stroke="#E8D5C4" stroke-width="1.5"/>
+
+  <!-- Settings gear (bottom right) -->
+  <g transform="translate(175, 175) scale(0.6)">
+    <circle cx="0" cy="0" r="25" fill="#89B4FA"/>
+    <circle cx="0" cy="0" r="15" fill="#1E1E2E"/>
+
+    <!-- Gear teeth -->
+    <rect x="-5" y="-32" width="10" height="14" rx="2" fill="#89B4FA"/>
+    <rect x="-5" y="18" width="10" height="14" rx="2" fill="#89B4FA"/>
+    <rect x="-32" y="-5" width="14" height="10" rx="2" fill="#89B4FA"/>
+    <rect x="18" y="-5" width="14" height="10" rx="2" fill="#89B4FA"/>
+
+    <rect x="-5" y="-32" width="10" height="14" rx="2" fill="#89B4FA" transform="rotate(45)"/>
+    <rect x="-5" y="18" width="10" height="14" rx="2" fill="#89B4FA" transform="rotate(45)"/>
+    <rect x="-32" y="-5" width="14" height="10" rx="2" fill="#89B4FA" transform="rotate(45)"/>
+    <rect x="18" y="-5" width="14" height="10" rx="2" fill="#89B4FA" transform="rotate(45)"/>
+  </g>
+</svg>
