@@ -55,12 +55,14 @@ npm link
 #### 命令行（全平台）
 
 ```bash
-claude-perm on       # 开启权限，所有工具自动放行
-claude-perm off      # 关闭权限，恢复逐个确认
-claude-perm status   # 查看当前状态
-claude-perm backup   # 备份当前设置
-claude-perm restore  # 从备份恢复设置
-claude-perm more     # 显示详细信息
+claude-perm on        # 开启权限，所有工具自动放行
+claude-perm off       # 关闭权限，恢复逐个确认
+claude-perm status    # 查看当前状态
+claude-perm backup    # 备份当前设置
+claude-perm restore   # 从备份恢复设置
+claude-perm clean     # 清理项目级别设置
+claude-perm clean-all # 清理所有项目设置
+claude-perm more      # 显示详细信息
 ```
 
 #### 图形界面（Windows）
@@ -192,7 +194,7 @@ A：能。它修改的是所有 Claude Code 界面共用的 `~/.claude/settings.
 A：编辑 `bin/cli.js` 或 `src/claude-perm.ps1` 里的 `ALLOWED_TOOLS` 数组即可。
 
 **Q：权限开启后还是被提示确认？**
-A：检查项目目录下是否有 `.claude/settings.local.json`，项目级别设置会覆盖全局设置。删除项目级设置或在其 `permissions.allow` 中添加相应工具。
+A：检查项目目录下是否有 `.claude/settings.local.json`，项目级别设置会覆盖全局设置。使用 `claude-perm clean` 清理当前项目设置，或 `claude-perm clean-all` 清理所有项目设置。
 
 **Q：如何备份和恢复设置？**
 A：使用 `claude-perm backup` 备份，`claude-perm restore` 恢复。备份文件保存在 `~/.claude/settings.backup.json`。
@@ -240,12 +242,14 @@ npm link
 #### CLI (all platforms)
 
 ```bash
-claude-perm on       # Allow all tool calls without prompts
-claude-perm off      # Restore permission prompts
-claude-perm status   # Show current state
-claude-perm backup   # Backup current settings
-claude-perm restore  # Restore from backup
-claude-perm more     # Show detailed info
+claude-perm on        # Allow all tool calls without prompts
+claude-perm off       # Restore permission prompts
+claude-perm status    # Show current state
+claude-perm backup    # Backup current settings
+claude-perm restore   # Restore from backup
+claude-perm clean     # Remove project-level settings
+claude-perm clean-all # Remove all project settings
+claude-perm more      # Show detailed info
 ```
 
 #### GUI (Windows)
@@ -319,7 +323,7 @@ A: Yes. It modifies the same `~/.claude/settings.json` used by all Claude Code i
 A: Edit the `ALLOWED_TOOLS` array in `bin/cli.js` or `src/claude-perm.ps1`.
 
 **Q: Still prompted for permission after enabling?**
-A: Check for project-level `.claude/settings.local.json` — it overrides global settings. Remove it or add tools to its `permissions.allow` array.
+A: Check for project-level `.claude/settings.local.json` — it overrides global settings. Use `claude-perm clean` to remove current project settings, or `claude-perm clean-all` to remove all project settings.
 
 **Q: How do I backup and restore settings?**
 A: Use `claude-perm backup` to backup, `claude-perm restore` to restore. Backup file: `~/.claude/settings.backup.json`.
