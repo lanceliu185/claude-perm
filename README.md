@@ -58,6 +58,9 @@ npm link
 claude-perm on       # 开启权限，所有工具自动放行
 claude-perm off      # 关闭权限，恢复逐个确认
 claude-perm status   # 查看当前状态
+claude-perm backup   # 备份当前设置
+claude-perm restore  # 从备份恢复设置
+claude-perm more     # 显示详细信息
 ```
 
 #### 图形界面（Windows）
@@ -162,6 +165,12 @@ A：能。它修改的是所有 Claude Code 界面共用的 `~/.claude/settings.
 **Q：想自定义允许哪些工具？**
 A：编辑 `bin/cli.js` 或 `src/claude-perm.ps1` 里的 `ALLOWED_TOOLS` 数组即可。
 
+**Q：权限开启后还是被提示确认？**
+A：检查项目目录下是否有 `.claude/settings.local.json`，项目级别设置会覆盖全局设置。删除项目级设置或在其 `permissions.allow` 中添加相应工具。
+
+**Q：如何备份和恢复设置？**
+A：使用 `claude-perm backup` 备份，`claude-perm restore` 恢复。备份文件保存在 `~/.claude/settings.backup.json`。
+
 ---
 
 <a id="english"></a>
@@ -208,6 +217,9 @@ npm link
 claude-perm on       # Allow all tool calls without prompts
 claude-perm off      # Restore permission prompts
 claude-perm status   # Show current state
+claude-perm backup   # Backup current settings
+claude-perm restore  # Restore from backup
+claude-perm more     # Show detailed info
 ```
 
 #### GUI (Windows)
@@ -264,6 +276,24 @@ A: Yes. It modifies the same `~/.claude/settings.json` used by all Claude Code i
 **Q: Can I customize which tools are allowed?**
 A: Edit the `ALLOWED_TOOLS` array in `bin/cli.js` or `src/claude-perm.ps1`.
 
+**Q: Still prompted for permission after enabling?**
+A: Check for project-level `.claude/settings.local.json` — it overrides global settings. Remove it or add tools to its `permissions.allow` array.
+
+**Q: How do I backup and restore settings?**
+A: Use `claude-perm backup` to backup, `claude-perm restore` to restore. Backup file: `~/.claude/settings.backup.json`.
+
 ## License
 
 [MIT](LICENSE)
+
+## Contributing
+
+欢迎贡献代码！
+
+1. Fork 这个仓库
+2. 创建你的功能分支 (`git checkout -b feature/your-feature`)
+3. 提交你的更改 (`git commit -m 'Add some feature'`)
+4. 推送到分支 (`git push origin feature/your-feature`)
+5. 创建一个 Pull Request
+
+有问题？请提交 [Issue](https://github.com/lanceliu185/claude-perm/issues)。

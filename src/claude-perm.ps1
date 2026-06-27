@@ -2,7 +2,9 @@ Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
 
-$SETTINGS_PATH = Join-Path $env:USERPROFILE ".claude\settings.json"
+$SETTINGS_DIR = Join-Path $env:USERPROFILE ".claude"
+$SETTINGS_PATH = Join-Path $SETTINGS_DIR "settings.json"
+$BACKUP_PATH = Join-Path $SETTINGS_DIR "settings.backup.json"
 
 $ALLOWED_TOOLS = @(
     "Bash(*)", "Read", "Write", "Edit", "Glob", "Grep",
@@ -47,18 +49,38 @@ function Set-Permissions($enabled) {
     Write-Settings $data
 }
 
+function Backup-Settings {
+    if (Test-Path $SETTINGS_PATH) {
+        Copy-Item -Path $SETTINGS_PATH -Destination $BACKUP_PATH -Force
+        [System.Windows.MessageBox]::Show("Settings backed up to:`n$BACKUP_PATH", "Backup Success", "OK", "Information")
+    } else {
+        [System.Windows.MessageBox]::Show("No settings file found to backup.", "Backup", "OK", "Warning")
+    }
+}
+
+function Restore-Settings {
+    if (Test-Path $BACKUP_PATH) {
+        Copy-Item -Path $BACKUP_PATH -Destination $SETTINGS_PATH -Force
+        Update-UI
+        [System.Windows.MessageBox]::Show("Settings restored from backup.", "Restore Success", "OK", "Information")
+    } else {
+        [System.Windows.MessageBox]::Show("No backup file found.", "Restore", "OK", "Warning")
+    }
+}
+
 # ── XAML ─────────────────────────────────────────────────────────────────────
 
 [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Claude Code Permission Toggle"
-        Width="420" Height="500"
+        Width="420" Height="560"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#1E1E2E">
     <Grid Margin="30">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -97,21 +119,32 @@ function Set-Permissions($enabled) {
                    x:Name="StatusText"
                    FontSize="16" FontWeight="SemiBold"
                    HorizontalAlignment="Center"
-                   Margin="0,0,0,20"/>
+                   Margin="0,0,0,15"/>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal"
-                    HorizontalAlignment="Center" Margin="0,0,0,20">
+                    HorizontalAlignment="Center" Margin="0,0,0,10">
             <Button x:Name="BtnOn" Content="Turn ON"
-                    Width="100" Height="32" Margin="0,0,10,0"
+                    Width="90" Height="32" Margin="0,0,8,0"
                     FontSize="13" FontWeight="SemiBold"/>
             <Button x:Name="BtnOff" Content="Turn OFF"
-                    Width="100" Height="32" Margin="10,0,0,0"
+                    Width="90" Height="32" Margin="8,0,0,0"
                     FontSize="13" FontWeight="SemiBold"/>
         </StackPanel>
 
+        <!-- Backup/Restore Buttons -->
+        <StackPanel Grid.Row="5" Orientation="Horizontal"
+                    HorizontalAlignment="Center" Margin="0,0,0,15">
+            <Button x:Name="BtnBackup" Content="Backup"
+                    Width="90" Height="28" Margin="0,0,8,0"
+                    FontSize="12"/>
+            <Button x:Name="BtnRestore" Content="Restore"
+                    Width="90" Height="28" Margin="8,0,0,0"
+                    FontSize="12"/>
+        </StackPanel>
+
         <!-- Tool List -->
-        <Border Grid.Row="5" Background="#181825" CornerRadius="10" Padding="15">
+        <Border Grid.Row="6" Background="#181825" CornerRadius="10" Padding="15">
             <StackPanel>
                 <TextBlock Text="Allowed Tools" FontSize="13"
                            Foreground="#6C7086" Margin="0,0,0,10"/>
@@ -128,7 +161,7 @@ function Set-Permissions($enabled) {
         </Border>
 
         <!-- Footer -->
-        <StackPanel Grid.Row="6" HorizontalAlignment="Center" Margin="0,15,0,0">
+        <StackPanel Grid.Row="7" HorizontalAlignment="Center" Margin="0,15,0,0">
             <TextBlock x:Name="PathText" FontSize="11" Foreground="#585B70"
                        HorizontalAlignment="Center" Margin="0,0,0,5"/>
             <TextBlock x:Name="HintText" FontSize="12" Foreground="#6C7086"
@@ -151,6 +184,8 @@ $PathText  = $window.FindName("PathText")
 $HintText  = $window.FindName("HintText")
 $BtnOn     = $window.FindName("BtnOn")
 $BtnOff    = $window.FindName("BtnOff")
+$BtnBackup = $window.FindName("BtnBackup")
+$BtnRestore = $window.FindName("BtnRestore")
 
 $PathText.Text = "Settings: $SETTINGS_PATH"
 $ToolList.ItemsSource = $ALLOWED_TOOLS
@@ -204,6 +239,8 @@ $Track.Add_MouseLeftButtonDown({ Do-Toggle })
 $Thumb.Add_MouseLeftButtonDown({ Do-Toggle })
 $BtnOn.Add_Click({ Do-On })
 $BtnOff.Add_Click({ Do-Off })
+$BtnBackup.Add_Click({ Backup-Settings })
+$BtnRestore.Add_Click({ Restore-Settings })
 $window.Add_Loaded({ Update-UI })
 
 # ── Run ──────────────────────────────────────────────────────────────────────

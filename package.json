@@ -1,13 +1,16 @@
 {
   "name": "claude-perm",
-  "version": "1.1.0",
-  "description": "One-click permission toggle for Claude Code — suppress all tool approval prompts",
+  "version": "1.2.0",
+  "description": "One-click permission toggle for Claude Code — suppress all tool approval prompts with backup support",
   "main": "bin/cli.js",
   "bin": {
     "claude-perm": "./bin/cli.js"
   },
   "scripts": {
-    "build:exe": "powershell -Command \"Import-Module ps2exe; Invoke-PS2EXE -InputFile src/claude-perm.ps1 -OutputFile dist/claude-perm.exe -noConsole -title 'Claude Code Permission Toggle' -version '1.1.0.0' -supportOS\""
+    "start": "node bin/cli.js",
+    "status": "node bin/cli.js status",
+    "build:exe": "powershell -Command \"Import-Module ps2exe; Invoke-PS2EXE -InputFile src/claude-perm.ps1 -OutputFile dist/claude-perm.exe -noConsole -title 'Claude Code Permission Toggle' -version '1.2.0.0' -supportOS\"",
+    "test": "node bin/cli.js status"
   },
   "keywords": [
     "claude",
@@ -17,9 +20,10 @@
     "cli",
     "toggle",
     "developer-tools",
-    "ai"
+    "ai",
+    "automation"
   ],
-  "author": "",
+  "author": "lanceliu185",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -31,5 +35,10 @@
   "homepage": "https://github.com/lanceliu185/claude-perm#readme",
   "engines": {
     "node": ">=16"
-  }
+  },
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ]
 }
